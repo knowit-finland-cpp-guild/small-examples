@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 #include <string.h>
 #include <signal.h>
 
@@ -9,8 +10,8 @@
 * C++ code illustrating:
 
 * Incorrect implementation of operator<
-    - Right implementation works when called
-    - Wrong implementation fails when called
+    - The right implementation works when called
+    - The wrong implementation fails when called
     - Fail occurs at sorting of vector with keys with
       wrong operator< (KeyWrong)
 * Operator selection is based on structs inherited
@@ -83,11 +84,12 @@ public:
 
     bool operator<(const KeyBase& rhs) const override
     {
-        return a == rhs.getA() ?
-               b == rhs.getB() ?
-               c <  rhs.getC() :
-               b <  rhs.getB() :
-               a <  rhs.getA();
+        return
+            a == rhs.getA()
+                ? b == rhs.getB()
+                    ? c <  rhs.getC()
+                    : b <  rhs.getB()
+                : a <  rhs.getA();
     }
 };
 
@@ -120,32 +122,38 @@ public:
         if (comp == Comparison::RIGHT)
         {
             // Select which function pointers to use with right keys
-            insertFunction = &VecKey::insertRight;
-            printFunction = &VecKey::printRight;
-            sortFunction = &VecKey::sortRight;
+            insertFunction = std::bind(&VecKey::insertRight, this,
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3);
+            printFunction = std::bind(&VecKey::printRight, this);
+            sortFunction = std::bind(&VecKey::sortRight, this);
         }
         else
         {
             // Select which function pointers to use with wrong keys
-            insertFunction = &VecKey::insertWrong;
-            printFunction = &VecKey::printWrong;
-            sortFunction = &VecKey::sortWrong;
+            insertFunction = std::bind(&VecKey::insertWrong, this,
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3);
+            printFunction = std::bind(&VecKey::printWrong, this);
+            sortFunction = std::bind(&VecKey::sortWrong, this);
         }
     }
 
     void insert(int a, int b, int c)
     {
-        (this->*insertFunction)(a, b, c);
+        insertFunction(a, b, c);
     }
 
     void print() const
     {
-        (this->*printFunction)();
+        printFunction();
     }
 
     void sort()
     {
-        (this->*sortFunction)();
+        sortFunction();
     }
 
 private:
@@ -188,27 +196,28 @@ private:
     Comparison comp;
     std::vector<KeyRight> vRight;
     std::vector<KeyWrong> vWrong;
-    void (VecKey::*insertFunction)(int, int, int);
-    void (VecKey::*printFunction)() const;
-    void (VecKey::*sortFunction)();
+    std::function<void(int, int, int)> insertFunction;
+    std::function<void()> printFunction;
+    std::function<void()> sortFunction;
 };
 
 // Determine the desired run, right or wrong
 bool parseArgs(const int argc, char *argv[], Comparison& comp)
 {
-    auto argRight = std::make_pair("comparison-right", false);
-    auto argWrong = std::make_pair("comparison-wrong", false);
+    std::string sr{"comparison-right"};
+    std::string sw{"comparison-wrong"};
+    bool flag{};
+    auto argRight{std::make_pair(sr, flag)};
+    auto argWrong{std::make_pair(sw, flag)};
 
-    for (int n = 1; n < argc; ++n)
-    {
-        if (std::string(argv[n]) == argRight.first)
-            argRight.second = true;
-        else if (std::string(argv[n]) == argWrong.first)
-            argWrong.second = true;
-    }
+    if (argc != 2)
+        ;
+    else if (std::string(argv[1]) == argRight.first)
+        argRight.second = true;
+    else if (std::string(argv[1]) == argWrong.first)
+        argWrong.second = true;
 
-
-    if (argc != 2 || argRight.second == argWrong.second)
+    if (argRight.second == argWrong.second)
     {
         std::cout << "Incompatible arguments. Use examples:"
                   << std::endl;
