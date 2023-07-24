@@ -15,10 +15,12 @@ public:
         this->cc = "member";
         this->dd = cc;
 
-//        aa = "member"; // Will not compile: aa const argument
-//        bb = aa;       // This is ok:       bb not const argument
-//        cc = "member"; // This is ok:       cc not const argument
-//        dd = cc;       // Will not compile: dd const argument
+/*
+        aa = "member"; // Will not compile: aa const argument
+        bb = aa;       // This is ok:       bb not const argument
+        cc = "member"; // This is ok:       cc not const argument
+        dd = cc;       // Will not compile: dd const argument
+*/
     }
 
     friend std::ostream& operator<<(
