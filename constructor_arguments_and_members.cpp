@@ -53,31 +53,36 @@ int main()
             "argument",
             "argument");
     
-    // Printout:
-    // a : member, b : argument, c : member, d : member
-    // aa: member, bb: argument, cc: member, dd: member
-    //
-    // Explanation:
-    // In the initializer list:
-    // a exists as an argument and as a member
-    // argument a is set to "argument"
-    // member a is set to "member"
-    // member b gets the value of a, from the argument
-    // c exists as a member and is set to "member"
-    // member d gets the value of member c
-    // 
-    // In the constructor scope:
-    // Variables aa, bb, cc, and dd get the same behavior
-    // as a, b, c, d, respectively,
-    // in the constructor scope as in the initializer list
-    // when the this pointer is used in the assignment.
-    //
-    // Summary:
-    // In the initializer list, with overlapping naming
-    // of argument and member, the precedence is
-    // 1: argument, 2: member.
-    // Using the this pointer, the same can be achieved
-    // within the constructor scope.
+/******************************************************
+Printout:
+
+    a : member, b : argument, c : member, d : member
+    aa: member, bb: argument, cc: member, dd: member
+
+Explanation:
+
+In the initializer list:
+    a exists as an argument and as a member
+    argument a is set to "argument"
+    member a is set to "member"
+    member b gets the value of a, from the argument
+    c exists as a member and is set to "member"
+    member d gets the value of member c
+
+In the constructor scope:
+    Variables aa, bb, cc, and dd get the same behavior
+    as a, b, c, d, respectively,
+    in the constructor scope as in the initializer list
+    when the this pointer is used in the assignment.
+
+Summary:
+
+    In the initializer list, with overlapping naming
+    of argument and member, the precedence is
+    1: argument, 2: member.
+    Using the this pointer, the same can be achieved
+    within the constructor scope.
+******************************************************/
     std::cout << t << std::endl;
 }
 
