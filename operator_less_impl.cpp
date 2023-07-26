@@ -2,7 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include <string.h>
 #include <signal.h>
 
 /****************************************************
@@ -116,44 +115,43 @@ public:
 // Holder class for vectors with either right or wrong operator<
 class VecKey
 {
+private:
+    using InsertFunction = std::function<void(VecKey&, int, int, int)>;
+    using PrintFunction = std::function<void(VecKey const&)>;
+    using SortFunction = std::function<void(VecKey&)>;
+
 public:
     VecKey(const Comparison comp) : comp(comp)
     {
         if (comp == Comparison::RIGHT)
         {
             // Select which function pointers to use with right keys
-            insertFunction = std::bind(&VecKey::insertRight, this,
-                    std::placeholders::_1,
-                    std::placeholders::_2,
-                    std::placeholders::_3);
-            printFunction = std::bind(&VecKey::printRight, this);
-            sortFunction = std::bind(&VecKey::sortRight, this);
+            insertFunction = &VecKey::insertRight;
+            printFunction = &VecKey::printRight;
+            sortFunction = &VecKey::sortRight;
         }
         else
         {
             // Select which function pointers to use with wrong keys
-            insertFunction = std::bind(&VecKey::insertWrong, this,
-                    std::placeholders::_1,
-                    std::placeholders::_2,
-                    std::placeholders::_3);
-            printFunction = std::bind(&VecKey::printWrong, this);
-            sortFunction = std::bind(&VecKey::sortWrong, this);
+            insertFunction = &VecKey::insertWrong;
+            printFunction = &VecKey::printWrong;
+            sortFunction = &VecKey::sortWrong;
         }
     }
 
     void insert(int a, int b, int c)
     {
-        insertFunction(a, b, c);
+        insertFunction(*this, a, b, c);
     }
 
     void print() const
     {
-        printFunction();
+        printFunction(*this);
     }
 
     void sort()
     {
-        sortFunction();
+        sortFunction(*this);
     }
 
 private:
@@ -196,9 +194,9 @@ private:
     Comparison comp;
     std::vector<KeyRight> vRight;
     std::vector<KeyWrong> vWrong;
-    std::function<void(int, int, int)> insertFunction;
-    std::function<void()> printFunction;
-    std::function<void()> sortFunction;
+    InsertFunction insertFunction;
+    PrintFunction printFunction;
+    SortFunction sortFunction;
 };
 
 // Determine the desired run, right or wrong
